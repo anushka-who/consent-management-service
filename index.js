@@ -1,13 +1,20 @@
 const express = require("express");
 
 const healthRouter = require("./routes/health");
-const pool = require("./db");
+const purposesRouter = require("./routes/purposes");
+const {
+    purposeNoticesRouter,
+    noticesRouter
+} = require("./routes/notices");
 
 const app = express();
 
 app.use(express.json());
 
 app.use("/health", healthRouter);
+app.use("/purposes", purposesRouter);
+app.use("/purposes", purposeNoticesRouter);
+app.use("/notices", noticesRouter);
 
 app.use((req, res) => {
     res.status(404).json({
