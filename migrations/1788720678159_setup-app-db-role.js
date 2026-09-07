@@ -1,8 +1,25 @@
 exports.up = (pgm) => {
-    pgm.createRole("consent_app", {
-        login: true,
-        password: process.env.APP_DB_PASSWORD
-    });
+    pgm.sql(`
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1
+                FROM pg_roles
+                WHERE rolname = 'consent_app'
+            ) THEN
+                CREATE ROLE consent_app
+                WITH
+                    NOSUPERUSER
+                    NOCREATEDB
+                    NOCREATEROLE
+                    INHERIT
+                    LOGIN
+                    NOREPLICATION
+                    PASSWORD 'consent_app_password';
+            END IF;
+        END
+        $$;
+    `);
 
     pgm.sql(`
         GRANT USAGE ON SCHEMA public TO consent_app;

@@ -7,6 +7,39 @@ const {
 
 const testRunId = Date.now();
 
+let purposeId;
+let noticeId;
+
+beforeAll(async () => {
+    const purpose = await pool.query(
+        `INSERT INTO purposes (code, description)
+         VALUES ($1, $2)
+         RETURNING purpose_id`,
+        [
+            `consent_events_test_${testRunId}`,
+            "Consent events test purpose"
+        ]
+    );
+
+    purposeId = purpose.rows[0].purpose_id;
+
+    const notice = await pool.query(
+        `INSERT INTO notices
+            (purpose_id, version, content, created_by)
+         VALUES
+            ($1, $2, $3, $4)
+         RETURNING notice_id`,
+        [
+            purposeId,
+            1,
+            "Consent events test notice",
+            "test_user"
+        ]
+    );
+
+    noticeId = notice.rows[0].notice_id;
+});
+
 const ownerPool = new Pool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,

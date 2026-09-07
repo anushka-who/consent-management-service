@@ -75,6 +75,33 @@ router.post("/:id/retire", async (req, res, next) => {
     try {
         const id = Number(req.params.id);
 
+        const purposeResult = await pool.query(
+            `SELECT *
+             FROM purposes
+             WHERE purpose_id = $1`,
+            [id]
+        );
+
+        if (purposeResult.rows.length === 0) {
+            return res.status(404).json({
+                error: "Purpose not found"
+            });
+        }
+
+        const consentResult = await pool.query(
+            `SELECT 1
+             FROM consent_events
+             WHERE purpose_id = $1
+             LIMIT 1`,
+            [id]
+        );
+
+        if (consentResult.rows.length > 0) {
+            return res.status(409).json({
+                error: "Purpose cannot be retired because consent has already been recorded"
+            });
+        }
+
         const result = await pool.query(
             `UPDATE purposes
              SET status = 'retired',
@@ -83,12 +110,6 @@ router.post("/:id/retire", async (req, res, next) => {
              RETURNING *`,
             [id]
         );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({
-                error: "Purpose not found"
-            });
-        }
 
         res.json(result.rows[0]);
     } catch (err) {
