@@ -148,6 +148,49 @@ describe("Consent API", () => {
         expect(response.body.status).toBe("not_granted");
     });
 
+    test("cannot retire a purpose after consent has been recorded", async () => {
+      const purpose = await pool.query(
+        `INSERT INTO purposes (code, description)
+         VALUES ($1, $2)
+         RETURNING purpose_id`,
+        [
+          `retire-test-${testRunId}`,
+          "Purpose used to test retirement after consent",
+        ],
+      );
+
+      const purposeId = purpose.rows[0].purpose_id;
+
+      const notice = await pool.query(
+        `INSERT INTO notices
+            (purpose_id, version, content, status, created_by)
+         VALUES
+            ($1, 1, $2, 'published', $3)
+         RETURNING notice_id`,
+        [purposeId, "Published notice for retirement test", "creator@test.com"],
+      );
+
+      const noticeId = notice.rows[0].notice_id;
+
+      await request(app)
+        .post("/consent/grants")
+        .send({
+          principal_ref: `retire-principal-${testRunId}`,
+          purpose_id: purposeId,
+          notice_id: noticeId,
+          idempotency_key: `retire-grant-${testRunId}`,
+        })
+        .expect(201);
+
+      const response = await request(app)
+        .post(`/purposes/${purposeId}/retire`)
+        .expect(409);
+
+      expect(response.body.error).toBe(
+        "Purpose cannot be retired because consent has already been recorded",
+      );
+    });
+
     test("supports grant → withdrawal → grant lifecycle", async () => {
         const principal = `lifecycle_user_${testRunId}`;
 
