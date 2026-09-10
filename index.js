@@ -27,7 +27,26 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
     if (err.name === "ZodError") {
         return res.status(400).json({
-            error: "Invalid request data"
+            error: "Invalid request data",
+            details: err.issues
+        });
+    }
+
+    if (err.code === "23505") {
+        return res.status(409).json({
+            error: "Resource already exists"
+        });
+    }
+
+    if (err.code === "23503") {
+        return res.status(400).json({
+            error: "Referenced resource does not exist"
+        });
+    }
+
+    if (err.code === "23514") {
+        return res.status(400).json({
+            error: "Invalid value"
         });
     }
 

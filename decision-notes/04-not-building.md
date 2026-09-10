@@ -53,3 +53,11 @@ The service could include features such as age verification, reporting, and hist
 - The service does not provide a complete customer-facing consent platform
 - Other systems would need to implement or integrate the excluded functionality separately
 - Additional functionality would require future design and implementation work
+
+### Authentication and authorization
+
+We are not implementing authentication or authorization in this UAT service.
+
+The service assumes identity has already been established by an upstream trusted system or gateway.
+
+This is intentionally outside the current project scope. A production deployment would need an explicit authentication and authorization design.
