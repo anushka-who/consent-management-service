@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consent Console · Pice</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div class="brand-text">
+        <div class="p1">pice</div>
+        <div class="p2">Consent Console</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <a class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" data-view="purposes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Purposes
+      </a>
+      <a class="nav-item" data-view="notices">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        Notices
+      </a>
+      <a class="nav-item" data-view="log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Consent Log
+      </a>
+      <a class="nav-item" data-view="principal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Principal Lookup
+      </a>
+      <a class="nav-item" data-view="api">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        API Playground
+      </a>
+
+      <div class="nav-section-label">Backend</div>
+      <a class="nav-item" data-view="dashboard" style="pointer-events:none; opacity:.55;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        All 5 stages · live
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="title" id="api-status-title">Checking API…</div>
+      <div class="desc" id="api-status-desc">Talking to the consent-service backend running on this machine.</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view active" id="view-dashboard">
+      <div class="topbar">
+        <div>
+          <h1>Consent overview</h1>
+          <div class="sub">DPDP consent management · UAT environment</div>
+        </div>
+        <div class="topbar-right">
+          <span class="badge-env" id="env-badge">Live · localhost:3000</span>
+          <div class="avatar">AS</div>
+        </div>
+      </div>
+
+      <div class="callout" id="dashboard-scope-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <div class="t">Purpose counts are live. Event stats are session-only.</div>
+          <div class="d">The API has no "list all consent events" endpoint (by design — see the brief's "not in this project" list), so the chart and recent-events table below only reflect actions taken from this console during this browser session.</div>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="stat-grid"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>Consent events, last 7 days</h3>
+            <div class="sub">Grants vs. withdrawals recorded through the API</div>
+          </div>
+        </div>
+        <div id="chart-legend" style="display:flex; gap:18px; margin-bottom:6px;"></div>
+        <div class="bars" id="chart-bars"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>Recent consent events</h3>
+            <div class="sub">Latest rows written to the append-only log</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" data-goto="log">View full log</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Principal</th><th>Purpose</th><th>Event</th><th>Source</th><th>Recorded at</th></tr>
+            </thead>
+            <tbody id="recent-events-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PURPOSES ---------- -->
+    <section class="view" id="view-purposes">
+      <div class="topbar">
+        <div>
+          <h1>Purposes</h1>
+          <div class="sub">The reasons Pice uses personal data. Retire, never delete.</div>
+        </div>
+        <button class="btn btn-primary" id="btn-new-purpose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New purpose
+        </button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="purpose-search" placeholder="Search purposes…" />
+        <select id="purpose-filter">
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="retired">Retired</option>
+        </select>
+      </div>
+
+      <div class="purpose-grid" id="purpose-grid"></div>
+    </section>
+
+    <!-- ---------- NOTICES ---------- -->
+    <section class="view" id="view-notices">
+      <div class="topbar">
+        <div>
+          <h1>Notices</h1>
+          <div class="sub">What we showed the customer when asking permission. Every version is kept forever.</div>
+        </div>
+        <button class="btn btn-primary" id="btn-new-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Draft notice
+        </button>
+      </div>
+
+      <div class="callout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div>
+          <div class="t">Published notices are immutable</div>
+          <div class="d">Once a notice is published it can never be edited — only a new version can be drafted. The API refuses to publish a draft where the approver is the same person as the drafter.</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <select id="notices-purpose-select"></select>
+        <input type="text" id="notice-actor" placeholder="Your name (used as drafted-by / approved-by)" style="min-width:280px;" />
+      </div>
+
+      <div id="notice-groups"></div>
+    </section>
+
+    <!-- ---------- CONSENT LOG ---------- -->
+    <section class="view" id="view-log">
+      <div class="topbar">
+        <div>
+          <h1>Session activity</h1>
+          <div class="sub">Every grant/withdrawal this console has sent to the real API, in order. Append-only, straight from the responses.</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div>
+          <div class="t">This is a session feed, not a database dump</div>
+          <div class="d">Each row here is a real response from <span class="mono">POST /consent/grants</span> or <span class="mono">/consent/withdrawals</span> made from this browser. There's no bulk "list all events" endpoint — refresh the page and this feed starts empty again, though the events themselves are permanently recorded in Postgres.</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="log-search" placeholder="Search by principal ref…" />
+        <select id="log-purpose-filter"><option value="all">All purposes</option></select>
+        <select id="log-action-filter">
+          <option value="all">All events</option>
+          <option value="granted">Granted</option>
+          <option value="withdrawn">Withdrawn</option>
+        </select>
+      </div>
+
+      <div class="panel" style="padding-top:8px;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Principal</th><th>Purpose</th><th>Event</th><th>Notice</th><th>Idempotency key</th><th>Recorded at</th></tr>
+            </thead>
+            <tbody id="log-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PRINCIPAL LOOKUP ---------- -->
+    <section class="view" id="view-principal">
+      <div class="topbar">
+        <div>
+          <h1>Principal lookup</h1>
+          <div class="sub">Look up any principal ref against the live API — real <span class="mono">/consent/check</span> and <span class="mono">/consent/principals/:ref/history</span> calls.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="search-box" style="max-width:420px; min-width:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="principal-search" placeholder="Search principal ref, phone, or business name…" />
+        </div>
+        <div id="principal-suggestions" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;"></div>
+      </div>
+
+      <div id="principal-result"></div>
+    </section>
+
+    <!-- ---------- API PLAYGROUND ---------- -->
+    <section class="view" id="view-api">
+      <div class="topbar">
+        <div>
+          <h1>API playground</h1>
+          <div class="sub">Real requests against the consent-service running on <span class="mono">localhost:3000</span> — the exact contract other Pice services build against.</div>
+        </div>
+      </div>
+
+      <div class="api-grid" id="api-grid"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ MODAL: New purpose ============ -->
+<div class="overlay" id="overlay-purpose">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>New purpose</h3>
+      <button class="modal-close" data-close><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="form-purpose">
+      <div class="field">
+        <label>Code</label>
+        <input type="text" id="pf-code" placeholder="e.g. fraud_monitoring" required />
+        <div class="hint">Machine-readable identifier — lowercase, underscores, no spaces.</div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="pf-desc" placeholder="What this purpose covers and why it's needed" required></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Create purpose</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: Notice version viewer ============ -->
+<div class="overlay" id="overlay-notice">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="nv-title">Notice text</h3>
+      <button class="modal-close" data-close><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="nv-meta" style="margin-bottom:14px;"></div>
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; font-size:13.5px; line-height:1.7; color:var(--ink-soft);" id="nv-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" data-close>Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: Draft notice ============ -->
+<div class="overlay" id="overlay-draft-notice">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Draft a new notice</h3>
+      <button class="modal-close" data-close><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="form-notice">
+      <div class="field">
+        <label>Purpose</label>
+        <select id="nf-purpose"></select>
+      </div>
+      <div class="field">
+        <label>Notice text (shown to the customer)</label>
+        <textarea id="nf-body" placeholder="Write the exact wording the customer will see…" required style="min-height:120px;"></textarea>
+        <div class="hint">Saved as a draft. Publishing is a separate step and needs a second approver.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save draft</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

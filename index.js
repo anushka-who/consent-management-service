@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 
 const healthRouter = require("./routes/health");
 const purposesRouter = require("./routes/purposes");
@@ -17,6 +18,8 @@ app.use("/purposes", purposesRouter);
 app.use("/purposes", purposeNoticesRouter);
 app.use("/notices", noticesRouter);
 app.use("/consent", consentRouter);
+
+app.use(express.static(path.join(__dirname, "ui-mockup")));
 
 app.use((req, res) => {
     res.status(404).json({
